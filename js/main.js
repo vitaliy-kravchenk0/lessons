@@ -1,31 +1,52 @@
 "use strict";
 
-let str = "some";
-let strObj = new String(str);
+// To String
 
-// console.log(typeof(str));
-// console.log(typeof(strObj));
+// 1)
+console.log(typeof(String(null)));
+console.log(typeof(String(4)));
 
-console.dir([1, 2, 3]);
+// 2)
+console.log(typeof(5 + ""));
 
-const soldier = {
-    health: 400,
-    armor: 100,
-    sayHello: function() {
-        console.log("Hello");
-    }
-};
+const num = 5;
 
-const john = Object.create(soldier);
+console.log("https://vk.com/catalog/" + num);
 
-// const john = {
-//     health: 100
-// };
+const fontSize = 26 + "px";
 
-// john.__proto__ = soldier;
+// To Number
 
-// Object.setPrototypeOf(john, soldier);
+// 1)
+console.log(typeof(Number("4")));
 
-// console.log(john.armor);
+// 2)
+console.log(typeof(+"5"));
 
-john.sayHello();
+// 3)
+console.log(typeof(parseInt("15px", 10)));
+
+let answ = +prompt("Hello", "");
+
+// To boolean
+
+// 0, "", null, undefined, NaN
+
+// 1)
+let switcher = null;
+
+if (switcher) {
+    console.log("Working...");
+}
+
+switcher = 1;
+
+if (switcher) {
+    console.log("Working...");
+}
+
+// 2)
+console.log(typeof(Boolean(4)));
+
+// 3)
+console.log(typeof(!!"44444"));
