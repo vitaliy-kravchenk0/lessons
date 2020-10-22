@@ -1,36 +1,44 @@
 document.addEventListener("DOMContentLoaded", () => {
     "use strict";
 
-    // touchstart
-    // touchmove
-    // touchend
-    // touchenter
-    // touchleave
-    // touchcancel
+     const btns = document.querySelectorAll("button"),
+     wrapper = document.querySelector(".btn-block");
 
+    //  console.log(btns[0].classList.length);
+    //  console.log(btns[0].classList.item(0));
+    //  console.log(btns[1].classList.add("red"));
+    //  console.log(btns[0].classList.remove("blue"));
+    //  console.log(btns[0].classList.toggle("blue"));
 
-    const box = document.querySelector(".box");
+    // if (btns[1].classList.contains("red")) {
+    //     console.log("red");
+    // }
 
-    box.addEventListener("touchstart", (e) => {
-        e.preventDefault();
+    btns[0].addEventListener("click", () => {
+        // if (!btns[1].classList.contains("red")) {
+        //     btns[1].classList.add("red");
+        // } else {
+        //     btns[1].classList.remove("red");
+        // }
 
-        console.log("Start");
-        console.log(e.targetTouches);
+        btns[1].classList.toggle("red");
     });
 
-    box.addEventListener("touchmove", (e) => {
-        e.preventDefault();
+    // console.log(btns[0].className);
 
-        console.log(e.targetTouches[0].pageX);
+    wrapper.addEventListener("click", (e) => {
+        if (e.target && e.target.matches("button.red")) {
+            console.log("Hello");
+        }
     });
 
-    // box.addEventListener("touchend", (e) => {
-    //     e.preventDefault();
-
-    //     console.log("End");
+    // btns.forEach(btn => {
+    //     btn.addEventListener("click", () => {
+    //         console.log("Hello");
+    //     });
     // });
-});
 
-// touches
-// targetTouches
-// changedYouches
+    const btn = document.createElement("button");
+    btn.classList.add("red");
+    wrapper.append(btn);
+});
