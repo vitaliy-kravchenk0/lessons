@@ -1,44 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
-    "use strict";
+    const tabsParent = document.querySelector(".tabheader__items"),
+          tabs = tabsParent.querySelectorAll(".tabheader__item"),
+          tabsContent = document.querySelectorAll(".tabcontent");
 
-     const btns = document.querySelectorAll("button"),
-     wrapper = document.querySelector(".btn-block");
+    function hideContent() {
+        tabsContent.forEach(item => {
+            item.classList.add("hide");
+            item.classList.remove("show", "fade");
+        });
 
-    //  console.log(btns[0].classList.length);
-    //  console.log(btns[0].classList.item(0));
-    //  console.log(btns[1].classList.add("red"));
-    //  console.log(btns[0].classList.remove("blue"));
-    //  console.log(btns[0].classList.toggle("blue"));
+        tabs.forEach(item => {
+            item.classList.remove("tabheader__item_active");
+        });
+    }
 
-    // if (btns[1].classList.contains("red")) {
-    //     console.log("red");
-    // }
+    function showContent(i = 0) {
+        tabsContent[i].classList.add("show", "fade");
+        tabsContent[i].classList.remove("hide");
+        tabs[i].classList.add("tabheader__item_active");
+    }
 
-    btns[0].addEventListener("click", () => {
-        // if (!btns[1].classList.contains("red")) {
-        //     btns[1].classList.add("red");
-        // } else {
-        //     btns[1].classList.remove("red");
-        // }
+    tabsParent.addEventListener("click", (e) => {
+        const target = e.target;
 
-        btns[1].classList.toggle("red");
-    });
-
-    // console.log(btns[0].className);
-
-    wrapper.addEventListener("click", (e) => {
-        if (e.target && e.target.matches("button.red")) {
-            console.log("Hello");
+        if (target && target.classList == "tabheader__item") {
+            tabs.forEach((item, i) => {
+                if (item == target) {
+                    hideContent();
+                    showContent(i);
+                }
+            });
         }
     });
 
-    // btns.forEach(btn => {
-    //     btn.addEventListener("click", () => {
-    //         console.log("Hello");
-    //     });
-    // });
-
-    const btn = document.createElement("button");
-    btn.classList.add("red");
-    wrapper.append(btn);
+    hideContent();
+    showContent();
 });
