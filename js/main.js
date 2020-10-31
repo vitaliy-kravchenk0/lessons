@@ -40,23 +40,23 @@ document.addEventListener("DOMContentLoaded", () => {
     showContent();
 
     // Timer
-    
-    const deadline = "2020-10-29";
+
+    let deadline = "2020-11-01";
 
     function getEndTime(endTime) {
         const total = new Date(endTime) - new Date(),
-              days = Math.floor(total / (1000 * 60 * 60 * 24)),
-              hours = Math.floor(total / (1000 * 60 * 60) % 24),
-              minutes = Math.floor(total / (1000 * 60) % 60),
-              seconds = Math.floor(total / 1000 % 60);
+            days = Math.floor(total / (1000 * 60 * 60 * 24)),
+            hours = Math.floor(total / (1000 * 60 * 60) % 24),
+            minutes = Math.floor(total / (1000 * 60) % 60),
+            seconds = Math.floor(total / 1000 % 60);
 
-              return {
-                  total: total,
-                  days: days,
-                  hours: hours,
-                  minutes: minutes,
-                  seconds: seconds
-              };
+        return {
+            total: total,
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        };
     }
 
     function addZero(num) {
@@ -69,15 +69,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getElements(endTime) {
         const days = document.querySelector("#days"),
-              hours = document.querySelector("#hours"),
-              minutes = document.querySelector("#minutes"),
-              seconds = document.querySelector("#seconds"),
-              timer = setInterval(setTime, 1000);
+            hours = document.querySelector("#hours"),
+            minutes = document.querySelector("#minutes"),
+            seconds = document.querySelector("#seconds"),
+            timer = setInterval(setTime, 1000);
 
         setTime();
 
         function setTime() {
-            const time = getEndTime(endTime);
+            let time = getEndTime(endTime);
 
             days.textContent = addZero(time.days);
             hours.textContent = addZero(time.hours);
@@ -86,9 +86,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (time.total <= 0) {
                 clearInterval(timer);
+
+                days.textContent = "00";
+                hours.textContent = "00";
+                minutes.textContent = "00";
+                seconds.textContent = "00";
+            } else {
+
             }
         }
     }
 
     getElements(deadline);
+
+    // Modal
+
+    const btnModal = document.querySelectorAll(".btn_modal"),
+        modal = document.querySelector(".modal"),
+        modalClose = document.querySelector(".modal__close");
+
+    btnModal.forEach(btn => {
+        btn.addEventListener("click", () => {
+            modal.classList.add("show", "fade");
+            modal.classList.remove("hide");
+            document.body.style.overflow = "hidden";
+        });
+    });
+
+    function closeModal() {
+        modal.classList.add("hide");
+        modal.classList.remove("show", "fade");
+        document.body.style.overflow = "";
+    }
+
+    modalClose.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (e) => {
+        console.dir(e);
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.code === "Escape" && modal.classList.contains("show")) {
+            closeModal();
+        }
+    });
 });
