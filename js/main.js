@@ -102,8 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Modal
 
     const btnModal = document.querySelectorAll(".btn_modal"),
-        modal = document.querySelector(".modal"),
-        modalClose = document.querySelector(".modal__close");
+        modal = document.querySelector(".modal");
 
     function openModal() {
         modal.classList.add("show", "fade");
@@ -125,11 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = "";
     }
 
-    modalClose.addEventListener("click", closeModal);
-
     modal.addEventListener("click", (e) => {
         console.dir(e);
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute("data-close") === "") {
             closeModal();
         }
     });
@@ -195,86 +192,190 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    new MenuCards(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        ".menu .container"
+    const getResource = async (url) => {
+        const res = await fetch(url);        
 
-    ).addCard();
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
 
-    new MenuCards(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        20,
-        ".menu .container"
-    ).addCard();
+        return await res.json();
+    };
 
-    new MenuCards(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        16,
-        ".menu .container"
-    ).addCard();
+    // getResource("http://localhost:3000/menu")
+    //     .then(data => {
+    //         data.forEach(({img, altimg, title, descr, price}) => {
+    //             new MenuCards(img, altimg, title, descr, price, ".menu .container").addCard();
+    //         });
+    //     });
+    
+    axios.get("http://localhost:3000/menu")
+        .then(data => {
+            data.data.forEach(({img, altimg, title, descr, price}) => {
+                new MenuCards(img, altimg, title, descr, price, ".menu .container").addCard();
+            });
+        });
+
+    // getResource("http://localhost:3000/menu")
+    //     .then(data => {
+    //         data.forEach(({img, altimg, title, descr, price}) => {
+    //             const element = document.createElement("div");
+
+    //             element.classList.add("menu__item");
+
+    //             element.innerHTML = `
+    //             <img src=${img} alt=$altimg}>
+    //             <h3 class="menu__item-subtitle">${title}</h3>
+    //             <div class="menu__item-descr">${descr}</div>
+    //             <div class="menu__item-divider"></div>
+    //             <div class="menu__item-price">
+    //                 <div class="menu__item-cost">Цена:</div>
+    //                 <div class="menu__item-total"><span>${price}</span> грн/день</div>
+    //             </div>
+    //         `;
+
+    //         document.querySelector(".menu .container").append(element);
+    //         });
+    //     });
 
     // Forms
 
     const forms = document.querySelectorAll("form");
     const messages = {
-        loading: "Идёт загрузка..",
-        success: "Форма отправлена, мы сккоро с вами свяжемся",
-        fail: "Упс.. Что-то пошло не так."
+        loading: "Загрузка..",
+        success: "Форма отправлена. Скоро мы с вами свяжемся!",
+        failed: "Упс.. Что-то пошло не так."
     };
 
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) {
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json"
+            },
+            body: data
+        });
 
-            const notification = document.createElement("div");
+        return await res.json();
+    };
 
-            notification.textContent = messages.loading;
-            form.appendChild(notification);
+    function bindPostData(form) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
 
-            const request = new XMLHttpRequest();
+            const imgNotification = document.createElement("img");
+            imgNotification.src = "img/form/spinner.svg";
+            imgNotification.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
 
-            request.open("POST", "server.php");
-            // request.setRequestHeader("Content-type", "multipart/form-data");
-            // request.setRequestHeader("Content-type", "application/json; charset=utf-8");
+            form.insertAdjacentElement("afterend", imgNotification);
 
             const formData = new FormData(form);
-            // const object = {};
 
-            // formData.forEach((value, key) => {
-            //     object[key] = value;
-            // });
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            // const json = JSON.stringify(object);
-
-            // request.send(json);
-            request.send(formData);
-
-            request.addEventListener("load", () => {
-                if (request.status === 200) {
-                    notification.textContent = messages.success;
-                    console.log(request.response);
+            postData("http://localhost:3000/requests", json)
+                .then(data => {
+                    console.log(data);
+                    showFormNotification(messages.success);
+                    imgNotification.remove();
+                })
+                .catch(() => {
+                    showFormNotification(messages.failed);
+                })
+                .finally(() => {
                     form.reset();
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 3000);
-                } else {
-                    notification.textContent = messages.fail;
-                }
-            });
+                });
         });
     }
+
+    function showFormNotification(textNotification) {
+        const modalForm = document.querySelector(".modal__dialog");
+
+        modalForm.classList.add("hide");
+        openModal();
+
+        const formNotification = document.createElement("div");
+
+        formNotification.classList.add("modal__dialog");
+        formNotification.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${textNotification}</div>
+            </div>
+        `;
+
+        document.querySelector(".modal").append(formNotification);
+
+        setInterval(() => {
+            formNotification.remove();
+            modalForm.classList.add("show");
+            modalForm.classList.remove("hide");
+            closeModal();
+        }, 4000);
+    }
+
+    // Slider
+
+    const sliderCurrent = document.querySelector("#current"),
+          sliderTotal = document.querySelector("#total"),
+          slides = document.querySelectorAll(".offer__slide"),
+          sliderArrowLeft = document.querySelector(".offer__slider-prev"),
+          sliderArrowRight = document.querySelector(".offer__slider-next");
+    
+    let slidesCounter = 1;
+
+    slides.forEach((item, index) => {
+        if (index + 1 >= 0 && index + 1 < 10) {
+            sliderTotal.textContent = `0${index + 1}`;
+        } else {
+            sliderTotal.textContent = index + 1;
+        }
+    });
+
+    function showSlideNumber() {
+        if (slidesCounter >= 0 && slidesCounter < 10) {
+            sliderCurrent.textContent = `0${slidesCounter}`;
+        } else {
+            sliderCurrent.textContent = slidesCounter;
+        }
+    }
+
+    showSlideNumber();
+
+    function showSlide() {
+        slides.forEach(item => {
+            item.classList.add("hide");
+        });
+        slides[slidesCounter - 1].classList.add("show");
+        slides[slidesCounter - 1].classList.remove("hide");
+    }
+
+    showSlide();
+
+    sliderArrowRight.addEventListener("click", () => {
+        if (slidesCounter == +sliderTotal.textContent) {
+            slidesCounter = 1;
+        } else {
+            slidesCounter += 1;
+        }
+        showSlideNumber();
+        showSlide();
+    });
+
+    sliderArrowLeft.addEventListener("click", () => {
+        if (slidesCounter == 1) {
+            slidesCounter = +sliderTotal.textContent;
+        } else {
+            slidesCounter -= 1;
+        }
+        showSlideNumber();
+        showSlide();
+    });
 });
